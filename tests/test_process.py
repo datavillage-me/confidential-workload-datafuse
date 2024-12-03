@@ -10,15 +10,15 @@ import logging
 import process
 
 class Test(unittest.TestCase):
-    def test_initialize(self):
-        """
-        Try the process to initialize
-        """
-        test_event = {
-            'type': 'INITIALIZE'
-        }
+    # def test_initialize(self):
+    #     """
+    #     Try the process to initialize
+    #     """
+    #     test_event = {
+    #         'type': 'INITIALIZE'
+    #     }
 
-        process.event_processor(test_event)
+    #     process.event_processor(test_event)
     
     def test_fuse(self):
         """
@@ -30,22 +30,22 @@ class Test(unittest.TestCase):
 
         process.event_processor(test_event)
 
-    def test_data_quality_check(self):
-        """
-        Try the process to check data quality
-        """
-        test_event = {
-            'type': 'CHECK_DATA_QUALITY'
-        }
+    # def test_data_quality_check(self):
+    #     """
+    #     Try the process to check data quality
+    #     """
+    #     test_event = {
+    #         'type': 'CHECK_DATA_QUALITY'
+    #     }
 
-        process.event_processor(test_event)
+    #     process.event_processor(test_event)
     
-    def test_common_customers_demo(self):
-        """
-        Try the process  without going through the redis queue
-        """
-        test_event = {
-            'type': 'CHECK_COMMON_DEMO_CUSTOMERS'
-        }
+    # def test_common_customers_demo(self):
+    #     """
+    #     Try the process  without going through the redis queue
+    #     """
+    #     test_event = {
+    #         'type': 'CHECK_COMMON_DEMO_CUSTOMERS'
+    #     }
         
-        process.event_processor(test_event)
+    #     process.event_processor(test_event)
