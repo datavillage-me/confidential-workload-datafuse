@@ -260,26 +260,26 @@ def check_common_customers_demo_event_processor(evt: dict):
         query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_01' AND table_schema = 'main';"
         table1 = con.sql(query).df()
         if len(table0)>0 and len(table1)>0:
-           #check common customers by email in the database in memory
-        #Common customers by email
-        #Create duckdb query
-        query="SELECT COUNT(*) as total FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
-        df = con.sql(query).df()
-        common_customers_by_email=df["total"].to_string(index=False)
+            #check common customers by email in the database in memory
+            #Common customers by email
+            #Create duckdb query
+            query="SELECT COUNT(*) as total FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
+            df = con.sql(query).df()
+            common_customers_by_email=df["total"].to_string(index=False)
 
-        #Write outputs for data user
-        #For now the output is written in an encrypted drive only accessible for data user
-        #TODO Connector for data users (write) have to be created
-        logger.info(f"| 3. Send output                                        |")
-        output_json={}
-        output_json["common_customers"]={"by_email":common_customers_by_email}
-        with open(default_settings.data_user_output_location+'/report.json', 'w', newline='') as file:
-                file.write(json.dumps(output_json, indent=4))
-        logger.info(f"|                                                       |")
-        execution_time=(time.time() - start_time)
-        logger.info(f"|    Execution time:  {execution_time} secs           |")
-        logger.info(f"|                                                       |")
-        logger.info(f"--------------------------------------------------------")
+            #Write outputs for data user
+            #For now the output is written in an encrypted drive only accessible for data user
+            #TODO Connector for data users (write) have to be created
+            logger.info(f"| 3. Send output                                        |")
+            output_json={}
+            output_json["common_customers"]={"by_email":common_customers_by_email}
+            with open(default_settings.data_user_output_location+'/report.json', 'w', newline='') as file:
+                    file.write(json.dumps(output_json, indent=4))
+            logger.info(f"|                                                       |")
+            execution_time=(time.time() - start_time)
+            logger.info(f"|    Execution time:  {execution_time} secs           |")
+            logger.info(f"|                                                       |")
+            logger.info(f"--------------------------------------------------------")
 
         else:
             logger.error(f"No table exist in memory, please initialise the fusion")
