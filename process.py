@@ -165,7 +165,6 @@ def tee_commutative_encrypt(data,company, public_keys, n):
     value=data
     for other_company, public_key in public_keys.items():
         if other_company != company:
-            print(other_company)
             value = commutative_encrypt(int(value), public_key, n)
     return value
 
@@ -212,8 +211,18 @@ def fuse_event_processor(evt: dict):
                     commutative_encrypt=tee_commutative_encrypt(row['customer_email'],participant,public_keys,n)
                     query="UPDATE customers_list_"+str(i)+" SET commutative_id = '"+str(commutative_encrypt)+"' WHERE customers_list_"+str(i)+".customer_email='"+row['customer_email']+"'"
                     res=con.sql(query)
-                encrypted_data=con.sql("SELECT customer_email from customers_list_"+str(i)).df().head(1)
-                
+                i=i+1
+            
+            #Common customers by email
+            #Create duckdb query
+            #query="SELECT * FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
+            query="SELECT * FROM customers_list_0"
+            df = con.sql(query).df()
+            print(df)
+            query="SELECT * FROM customers_list_1"
+            df = con.sql(query).df()
+            print(df)
+            
         else:
             logger.error(f"No data contract available for collaboration_space_id: {collaboration_space_id}")
     except Exception as e:

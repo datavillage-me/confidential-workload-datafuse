@@ -94,11 +94,13 @@ def random_email(n):
 duckdb.create_function("id", random_id, [DOUBLE], VARCHAR)
 duckdb.create_function("email", random_email, [DOUBLE], VARCHAR)
 
-encryption_keys = ["GZs0DsMHdXr39mzkFwHwTHvCuUlID3HB","8SX9rT9VSHohHgEz2qRer5oCoid2RUAS"]
+participants=["66e1a579eb0cbee048a2bd04","66e1a4eaeb0cbee048a2bcf3"]
+encryption_keys = {}
+encryption_keys["66e1a579eb0cbee048a2bd04"]="GZs0DsMHdXr39mzkFwHwTHvCuUlID3HB"
+encryption_keys["66e1a4eaeb0cbee048a2bcf3"]="8SX9rT9VSHohHgEz2qRer5oCoid2RUAS"
 
 # Generate synthetic datasets
-numberOfRecords=100
-numberOfDatasets=2
+numberOfRecords=2
 
 with open('tests/fixtures/shared_modulus.json') as f:
     d = json.load(f)
@@ -107,15 +109,15 @@ encrypt_n=d["n"]
 with open('tests/fixtures/public_keys.json') as f:
     d = json.load(f)
 public_keys=d
-
-for x in range(numberOfDatasets):
-    public_key=list(public_keys.values())[x]
+i=0
+for participant in participants:
+    public_key=public_keys[participant]
     #create temp table
     query="SELECT id(i) as customer_id, email(i) as customer_email FROM generate_series(1, "+str(numberOfRecords)+") s(i)"
     res=duckdb.sql("CREATE OR REPLACE TABLE customers_list AS "+query) 
 
     #create parquet file non encrypted
-    query="COPY customers_list TO 'data/customers-list"+str(x)+".parquet'  (FORMAT 'parquet')"
+    query="COPY customers_list TO 'data/customers-list"+str(i)+".parquet'  (FORMAT 'parquet')"
     res = duckdb.sql(query)
 
     #create encrypted parquet file
@@ -124,10 +126,11 @@ for x in range(numberOfDatasets):
         query="UPDATE customers_list SET customer_email = '"+str(encrypt_email(row['customer_email']))+"' WHERE customers_list.customer_email='"+row['customer_email']+"'"
         res=duckdb.sql(query)
 
-    key = encryption_keys[x]
-    keyName="dataset"+str(x)
+    key = encryption_keys[participant]
+    keyName="dataset"+participant
     res=duckdb.sql("PRAGMA add_parquet_key('"+keyName+"','"+key+"')")
-    res=duckdb.sql("COPY customers_list TO './data/customers-list"+str(x)+"-encrypted.parquet' (ENCRYPTION_CONFIG {footer_key: '"+keyName+"'})")
+    res=duckdb.sql("COPY customers_list TO './data/customers-list"+str(i)+"-encrypted.parquet' (ENCRYPTION_CONFIG {footer_key: '"+keyName+"'})")
+    i=i+1
 
 df = duckdb.sql("SELECT * FROM read_parquet('data/customers-list0.parquet')").df()
 print (df)
