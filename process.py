@@ -213,11 +213,8 @@ def fuse_event_processor(evt: dict):
                     res=con.sql(query)
                 i=i+1
             #check if tables exist in memory
-            query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_0' AND table_schema = 'main';"
-            table0 = con.sql(query).df()
-            query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_1' AND table_schema = 'main';"
-            table1 = con.sql(query).df()
-            if len(table0)>0 and len(table1)>0:
+            existing_tables=con.sql("SHOW ALL TABLES; ")
+            if len(existing_tables)>0:
                 logger.info(f"| Database have been created in memory                  |")
                 logger.info(f"|                                                       |")
             execution_time=(time.time() - start_time)
@@ -253,11 +250,8 @@ def check_common_customers_demo_event_processor(evt: dict):
         #create db connection to in memory encrypted database
         con = duckdb.connect(database=":memory:")
         #check if tables exist in memory
-        query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_0' AND table_schema = 'main';"
-        table0 = con.sql(query).df()
-        query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_1' AND table_schema = 'main';"
-        table1 = con.sql(query).df()
-        if len(table0)>0 and len(table1)>0:
+        existing_tables=con.sql("SHOW ALL TABLES; ")
+        if len(existing_tables)>0:
             #check common customers by email in the database in memory
             #Common customers by email
             #Create duckdb query
