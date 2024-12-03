@@ -100,7 +100,7 @@ encryption_keys["66e1a579eb0cbee048a2bd04"]="GZs0DsMHdXr39mzkFwHwTHvCuUlID3HB"
 encryption_keys["66e1a4eaeb0cbee048a2bcf3"]="8SX9rT9VSHohHgEz2qRer5oCoid2RUAS"
 
 # Generate synthetic datasets
-numberOfRecords=2
+numberOfRecords=100
 
 with open('tests/fixtures/shared_modulus.json') as f:
     d = json.load(f)
@@ -131,6 +131,12 @@ for participant in participants:
     res=duckdb.sql("PRAGMA add_parquet_key('"+keyName+"','"+key+"')")
     res=duckdb.sql("COPY customers_list TO './data/customers-list"+str(i)+"-encrypted.parquet' (ENCRYPTION_CONFIG {footer_key: '"+keyName+"'})")
     i=i+1
+
+# #create payload
+# public_key=public_keys["66e1a419eb0cbee048a2bce3"]
+# email='john.doe@example.com'
+# payload=encrypt_email(email)
+# print(payload)
 
 # df = duckdb.sql("SELECT * FROM read_parquet('data/customers-list0.parquet')").df()
 # print (df)
