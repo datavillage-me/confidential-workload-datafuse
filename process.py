@@ -189,7 +189,7 @@ def fuse_event_processor(evt: dict):
         logger.info(f"|                                                       |")
 
         #Connect in memory duckdb (encrypted memory on confidential computing)
-        con = duckdb.connect(database=":memory:confidential_db")
+        con = duckdb.connect(database=":memory:")
 
         collaboration_space_id=default_settings.collaboration_space_id
         contractManager=ContractManager()
@@ -216,7 +216,8 @@ def fuse_event_processor(evt: dict):
             #check if tables exist in memory
             existing_tables=con.sql("SHOW ALL TABLES; ")
             if len(existing_tables)>0:
-                logger.info(f"| Database have been created in memory                  |")
+                con.sql("EXPORT DATABASE '"+default_settings.data_connector_config_location+"' (FORMAT PARQUET);")
+                logger.info(f"| Database has  been created                            |")
                 logger.info(f"|                                                       |")
             execution_time=(time.time() - start_time)
             logger.info(f"|    Execution time:  {execution_time} secs           |")
@@ -249,7 +250,8 @@ def check_common_customers_demo_event_processor(evt: dict):
         logger.info(f"| 1. Evaluate common customers                          |")
         logger.info(f"|                                                       |")
         #Connect in memory duckdb (encrypted memory on confidential computing)
-        con = duckdb.connect(database=":memory:confidential_db")
+        con = duckdb.connect(database=":memory:")
+        con.sql("IMPORT DATABASE '"+default_settings.data_connector_config_location+"'") 
         #check if tables exist in memory
         existing_tables=con.sql("SHOW ALL TABLES; ")
         if len(existing_tables)>0:
