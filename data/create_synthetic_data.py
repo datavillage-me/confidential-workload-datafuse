@@ -132,10 +132,10 @@ for participant in participants:
     res=duckdb.sql("COPY customers_list TO './data/customers-list"+str(i)+"-encrypted.parquet' (ENCRYPTION_CONFIG {footer_key: '"+keyName+"'})")
     i=i+1
 
-df = duckdb.sql("SELECT * FROM read_parquet('data/customers-list0.parquet')").df()
-print (df)
-df = duckdb.sql("SELECT * FROM read_parquet('data/customers-list1.parquet')").df()
-print (df)
+# df = duckdb.sql("SELECT * FROM read_parquet('data/customers-list0.parquet')").df()
+# print (df)
+# df = duckdb.sql("SELECT * FROM read_parquet('data/customers-list1.parquet')").df()
+# print (df)
 
 
 # duckdb.sql("IMPORT DATABASE 'tests/fixtures'")

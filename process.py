@@ -216,7 +216,7 @@ def fuse_event_processor(evt: dict):
                     (item["clientId"] for item in participants if "dataDescriptors" in item and any(dd["id"] == target_id for dd in item["dataDescriptors"])),
                     None
                 )
-                participant=public_keys[client_id]
+                participant=client_id
 
                 for index, row in encrypted_data.iterrows():
                     commutative_encrypt=tee_commutative_encrypt(row['customer_email'],participant,public_keys,n)
