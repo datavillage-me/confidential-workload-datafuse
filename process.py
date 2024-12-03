@@ -23,8 +23,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-#Create in memory duckdb (encrypted memory on confidential computing)
-con = duckdb.connect(database=":memory:")
 
 # define an event processing function
 def event_processor(evt: dict):
@@ -189,6 +187,10 @@ def fuse_event_processor(evt: dict):
 
         logger.info(f"| 2. Get data contracts                                 |")
         logger.info(f"|                                                       |")
+
+        #Connect in memory duckdb (encrypted memory on confidential computing)
+        con = duckdb.connect(database=":memory:confidential_db")
+
         collaboration_space_id=default_settings.collaboration_space_id
         contractManager=ContractManager()
         data_contracts=contractManager.get_contracts_for_collaboration_space(collaboration_space_id)
@@ -246,6 +248,8 @@ def check_common_customers_demo_event_processor(evt: dict):
        
         logger.info(f"| 1. Evaluate common customers                          |")
         logger.info(f"|                                                       |")
+        #Connect in memory duckdb (encrypted memory on confidential computing)
+        con = duckdb.connect(database=":memory:confidential_db")
         #check if tables exist in memory
         existing_tables=con.sql("SHOW ALL TABLES; ")
         if len(existing_tables)>0:
