@@ -215,7 +215,11 @@ def fuse_event_processor(evt: dict):
             
             #Common customers by email
             #Create duckdb query
-            #query="SELECT * FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
+            query="SELECT COUNT(*) as total FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
+            df = con.sql(query).df()
+            common_customers_by_email=df["total"].to_string(index=False)
+            print(common_customers_by_email)
+
             query="SELECT * FROM customers_list_0"
             df = con.sql(query).df()
             print(df)
@@ -245,65 +249,39 @@ def check_common_customers_demo_event_processor(evt: dict):
     logger.info(f"|                                                       |")
     audit_log(f"Start processing event: {evt.get('type', '')}.",LogLevel.INFO)
     try:
-        collaboration_space_id=default_settings.collaboration_space_id
-        logger.info(f"| 1. Get data contracts                                 |")
+       
+        logger.info(f"| 1. Evaluate common customers                          |")
         logger.info(f"|                                                       |")
-        contractManager=ContractManager()
-        data_contracts=contractManager.get_contracts_for_collaboration_space(collaboration_space_id)
-        if data_contracts != None and len(data_contracts)>0:
-            #Create in memory duckdb (encrypted memory on confidential computing)
-            con = duckdb.connect(database=":memory:")
-            
-            #Add connector settings to duckdb con for all data contracts (2 data contracts in this example)
-            con = data_contracts[0].connector.add_duck_db_connection(con)
-            con = data_contracts[1].connector.add_duck_db_connection(con)
+        #create db connection to in memory encrypted database
+        con = duckdb.connect(database=":memory:")
+        #check if tables exist in memory
+        query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_0' AND table_schema = 'main';"
+        table0 = con.sql(query).df()
+        query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_01' AND table_schema = 'main';"
+        table1 = con.sql(query).df()
+        if len(table0)>0 and len(table1)>0:
+           #check common customers by email in the database in memory
+        #Common customers by email
+        #Create duckdb query
+        query="SELECT COUNT(*) as total FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
+        df = con.sql(query).df()
+        common_customers_by_email=df["total"].to_string(index=False)
 
-            logger.info(f"| 2. Evaluate common customers                          |")
-            #Create duckdb in memory db for optimisation
-            query=f"SELECT * FROM {data_contracts[0].connector.get_duckdb_source()}"
-            res=con.sql("CREATE OR REPLACE TABLE customers_list_1 AS "+query) 
-            audit_log(f"Read data from: {data_contracts[0].data_descriptor_id}.",LogLevel.INFO)
-            query=f"SELECT * FROM {data_contracts[1].connector.get_duckdb_source()}"
-            res=con.sql("CREATE OR REPLACE TABLE customers_list_2 AS "+query) 
-            audit_log(f"Read data from: {data_contracts[1].data_descriptor_id}.",LogLevel.INFO)
-            #Common customers by name
-            #Create duckdb query
-            query="SELECT COUNT(*) as total FROM customers_list_1,customers_list_2 WHERE (customers_list_1.customer_name=customers_list_2.customer_name)"
-            df = con.sql(query).df()
-            common_customers_by_name=df["total"].to_string(index=False)
-            
-            #Common customers by email
-            #Create duckdb query
-            query="SELECT COUNT(*) as total FROM customers_list_1,customers_list_2 WHERE (customers_list_1.customer_email=customers_list_2.customer_email)"
-            df = con.sql(query).df()
-            common_customers_by_email=df["total"].to_string(index=False)
-           
-            #Common customers by company
-            #Create duckdb query
-            query="SELECT COUNT(*) as total FROM customers_list_1,customers_list_2 WHERE (customers_list_1.customer_company=customers_list_2.customer_company)"
-            df = con.sql(query).df()
-            common_customers_by_company=df["total"].to_string(index=False)
-            logger.info(f"|                                                       |")
-            
-            #Remove in memory database 
-            res=con.sql("DROP TABLE customers_list_1") 
-            res=con.sql("DROP TABLE customers_list_2") 
-
-            #Write outputs for data user
-            #For now the output is written in an encrypted drive only accessible for data user
-            #TODO Connector for data users (write) have to be created
-            logger.info(f"| 3. Send output                                        |")
-            output_json={}
-            output_json["common_customers"]={"by_name":common_customers_by_name,"by_email":common_customers_by_email,"by_company":common_customers_by_company}
-            with open(default_settings.data_user_output_location+'/report.json', 'w', newline='') as file:
-                    file.write(json.dumps(output_json, indent=4))
-            logger.info(f"|                                                       |")
-            execution_time=(time.time() - start_time)
-            logger.info(f"|    Execution time:  {execution_time} secs           |")
-            logger.info(f"|                                                       |")
-            logger.info(f"--------------------------------------------------------")
+        #Write outputs for data user
+        #For now the output is written in an encrypted drive only accessible for data user
+        #TODO Connector for data users (write) have to be created
+        logger.info(f"| 3. Send output                                        |")
+        output_json={}
+        output_json["common_customers"]={"by_email":common_customers_by_email}
+        with open(default_settings.data_user_output_location+'/report.json', 'w', newline='') as file:
+                file.write(json.dumps(output_json, indent=4))
+        logger.info(f"|                                                       |")
+        execution_time=(time.time() - start_time)
+        logger.info(f"|    Execution time:  {execution_time} secs           |")
+        logger.info(f"|                                                       |")
+        logger.info(f"--------------------------------------------------------")
 
         else:
-            logger.error(f"No data contract available for collaboration_space_id: {collaboration_space_id}")
+            logger.error(f"No table exist in memory, please initialise the fusion")
     except Exception as e:
         logger.error(e) 
