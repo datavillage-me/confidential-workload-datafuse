@@ -39,7 +39,7 @@ def event_processor(evt: dict):
         # use the INITIALIZE event processor dedicated function
         logger.info(f"Use the initialize event processor")
         initialize_event_processor(evt)
-    if evt_type == "FUSE":
+    elif evt_type == "FUSE":
         # use the FUSE event processor dedicated function
         logger.info(f"Use the fuse event processor")
         fuse_event_processor(evt)
