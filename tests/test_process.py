@@ -10,23 +10,23 @@ import logging
 import process
 
 class Test(unittest.TestCase):
-    def test_initialize(self):
-        """
-        Try the process to initialize
-        """
-        test_event = {
-            'type': 'INITIALIZE'
-        }
-
-        process.event_processor(test_event)
-    
-    # def test_fuse(self):
+    # def test_initialize(self):
     #     """
     #     Try the process to initialize
     #     """
     #     test_event = {
-    #         'type': 'FUSE'
+    #         'type': 'INITIALIZE'
     #     }
+
+    #     process.event_processor(test_event)
+    
+    def test_fuse(self):
+        """
+        Try the process to initialize
+        """
+        test_event = {
+            'type': 'FUSE'
+        }
 
     #     process.event_processor(test_event)
 

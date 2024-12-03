@@ -212,20 +212,18 @@ def fuse_event_processor(evt: dict):
                     query="UPDATE customers_list_"+str(i)+" SET commutative_id = '"+str(commutative_encrypt)+"' WHERE customers_list_"+str(i)+".customer_email='"+row['customer_email']+"'"
                     res=con.sql(query)
                 i=i+1
-            
-            #Common customers by email
-            #Create duckdb query
-            query="SELECT COUNT(*) as total FROM customers_list_0,customers_list_1 WHERE (customers_list_0.commutative_id=customers_list_1.commutative_id)"
-            df = con.sql(query).df()
-            common_customers_by_email=df["total"].to_string(index=False)
-            print(common_customers_by_email)
-
-            query="SELECT * FROM customers_list_0"
-            df = con.sql(query).df()
-            print(df)
-            query="SELECT * FROM customers_list_1"
-            df = con.sql(query).df()
-            print(df)
+            #check if tables exist in memory
+            query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_0' AND table_schema = 'main';"
+            table0 = con.sql(query).df()
+            query="SELECT table_name FROM information_schema.tables WHERE table_name = 'customers_list_01' AND table_schema = 'main';"
+            table1 = con.sql(query).df()
+            if len(table0)>0 and len(table1)>0:
+                logger.info(f"| Database have been created in memory                  |")
+                logger.info(f"|                                                       |")
+            execution_time=(time.time() - start_time)
+            logger.info(f"|    Execution time:  {execution_time} secs           |")
+            logger.info(f"|                                                       |")
+            logger.info(f"--------------------------------------------------------")
             
         else:
             logger.error(f"No data contract available for collaboration_space_id: {collaboration_space_id}")
