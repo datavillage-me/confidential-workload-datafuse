@@ -4,3 +4,4 @@ dv-utils>=1.0.1
 pandas
 openpyxl
 duckdb==1.0.0
+sympy
