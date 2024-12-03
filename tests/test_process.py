@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
             'type': 'FUSE'
         }
 
-    #     process.event_processor(test_event)
+        process.event_processor(test_event)
 
     # def test_data_quality_check(self):
     #     """
