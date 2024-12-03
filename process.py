@@ -207,7 +207,17 @@ def fuse_event_processor(evt: dict):
                 audit_log(f"Read data from: {data_contract.data_descriptor_id}.",LogLevel.INFO)
                 res=con.sql("ALTER TABLE customers_list_"+str(i)+" ADD COLUMN commutative_id VARCHAR")
                 encrypted_data=con.sql("SELECT customer_email from customers_list_"+str(i)).df()
-                participant=list(public_keys)[i]
+                
+                #TODO need to add the client_id in a contract within a collaboration space... to be discussed with the team
+                client=Client()
+                participants=client.get_list_of_participants(collaboration_space_id,None)
+                target_id=data_contract.data_descriptor_id
+                client_id = next(
+                    (item["clientId"] for item in participants if "dataDescriptors" in item and any(dd["id"] == target_id for dd in item["dataDescriptors"])),
+                    None
+                )
+                participant=public_keys[client_id]
+
                 for index, row in encrypted_data.iterrows():
                     commutative_encrypt=tee_commutative_encrypt(row['customer_email'],participant,public_keys,n)
                     query="UPDATE customers_list_"+str(i)+" SET commutative_id = '"+str(commutative_encrypt)+"' WHERE customers_list_"+str(i)+".customer_email='"+row['customer_email']+"'"
